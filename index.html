@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+
+  /* ============================================================
+     EDIT YOUR IMAGES HERE — see the IMAGES array in the <script>
+     at the bottom of this file. Each image lives in /images/
+     and gets a title + caption you write yourself.
+     ============================================================ */
+
+  :root{
+    --charcoal: #18171a;
+    --charcoal-2: #221f22;
+    --paper: #f3efe6;
+    --paper-dim: #cfc8b8;
+    --safelight: #e0402a;
+    --safelight-dim: #7a2a1e;
+    --sprocket: #0d0c0e;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background:var(--charcoal);
+    color:var(--paper);
+    font-family:'IBM Plex Mono', monospace;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- sprocket strip ---------- */
+  .sprockets{
+    display:flex;
+    background:var(--sprocket);
+    height:22px;
+    align-items:center;
+    overflow:hidden;
+    gap:14px;
+    padding:0 14px;
+  }
+  .sprockets span{
+    flex:0 0 auto;
+    width:10px;
+    height:7px;
+    background:var(--charcoal);
+    border-radius:2px;
+  }
+
+  /* ---------- header ---------- */
+  header{
+    padding:5vw 6vw 6vw;
+    border-bottom:1px solid #333136;
+    position:relative;
+  }
+  .eyebrow{
+    font-size:12px;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--safelight);
+    margin-bottom:22px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:7px; height:7px;
+    border-radius:50%;
+    background:var(--safelight);
+    box-shadow:0 0 10px 2px var(--safelight);
+    display:inline-block;
+    animation:pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{ opacity:1; }
+    50%{ opacity:.35; }
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-style:italic;
+    font-size:clamp(2.6rem, 7vw, 5.2rem);
+    line-height:1.02;
+    letter-spacing:-.01em;
+    max-width:14ch;
+  }
+  .sub{
+    margin-top:22px;
+    max-width:52ch;
+    color:var(--paper-dim);
+    font-size:14px;
+    line-height:1.7;
+  }
+  .roll-meta{
+    margin-top:40px;
+    display:flex;
+    gap:32px;
+    flex-wrap:wrap;
+    font-size:11px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:#6f6c6a;
+  }
+  .roll-meta b{ color:var(--paper-dim); font-weight:500; }
+
+  /* ---------- contact sheet grid ---------- */
+  main{
+    padding:5vw 6vw 8vw;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(240px, 1fr));
+    gap:2px;
+    background:#333136;
+    border:1px solid #333136;
+  }
+  .frame{
+    position:relative;
+    background:var(--charcoal-2);
+    cursor:pointer;
+    overflow:hidden;
+    aspect-ratio:4/5;
+  }
+  .frame img{
+    width:100%; height:100%;
+    object-fit:cover;
+    display:block;
+    filter:grayscale(65%) contrast(1.02) brightness(.92);
+    transition:filter .5s ease, transform .7s cubic-bezier(.2,.8,.2,1);
+    transform:scale(1.01);
+  }
+  .frame:hover img{
+    filter:grayscale(0%) contrast(1.05) brightness(1);
+    transform:scale(1.06);
+  }
+  .frame-id{
+    position:absolute;
+    top:10px; left:10px;
+    font-size:10px;
+    letter-spacing:.08em;
+    color:var(--paper);
+    background:rgba(13,12,14,.65);
+    padding:3px 7px;
+    border:1px solid rgba(243,239,230,.15);
+  }
+  .frame-cap{
+    position:absolute;
+    left:0; right:0; bottom:0;
+    padding:14px 12px 12px;
+    background:linear-gradient(to top, rgba(13,12,14,.92), transparent);
+    transform:translateY(8px);
+    opacity:0;
+    transition:opacity .35s ease, transform .35s ease;
+  }
+  .frame:hover .frame-cap{ opacity:1; transform:translateY(0); }
+  .frame-cap .t{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:15px;
+    color:var(--paper);
+    margin-bottom:2px;
+  }
+  .frame-cap .d{
+    font-size:10.5px;
+    color:var(--paper-dim);
+    line-height:1.4;
+  }
+  .frame::after{
+    content:"";
+    position:absolute; inset:0;
+    box-shadow:inset 0 0 0 0 var(--safelight);
+    transition:box-shadow .3s ease;
+    pointer-events:none;
+  }
+  .frame:hover::after{
+    box-shadow:inset 0 0 0 2px var(--safelight);
+  }
+
+  /* ---------- lightbox ---------- */
+  .lightbox{
+    position:fixed; inset:0;
+    background:rgba(13,12,14,.96);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:100;
+    padding:5vw;
+    flex-direction:column;
+  }
+  .lightbox.open{ display:flex; }
+  .lightbox img{
+    max-width:min(84vw, 1100px);
+    max-height:70vh;
+    object-fit:contain;
+    box-shadow:0 30px 80px rgba(0,0,0,.6);
+  }
+  .lb-cap{
+    max-width:min(84vw,1100px);
+    width:100%;
+    margin-top:20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:20px;
+  }
+  .lb-cap .t{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:22px;
+  }
+  .lb-cap .d{
+    color:var(--paper-dim);
+    font-size:12px;
+    margin-top:6px;
+    max-width:60ch;
+    line-height:1.6;
+  }
+  .lb-idx{
+    font-size:11px;
+    color:var(--safelight);
+    letter-spacing:.1em;
+    white-space:nowrap;
+  }
+  .lb-close, .lb-nav{
+    position:absolute;
+    background:none;
+    border:1px solid rgba(243,239,230,.2);
+    color:var(--paper);
+    font-family:'IBM Plex Mono', monospace;
+    cursor:pointer;
+    transition:border-color .2s ease, color .2s ease;
+  }
+  .lb-close{
+    top:24px; right:24px;
+    width:38px; height:38px;
+    font-size:16px;
+  }
+  .lb-nav{
+    top:50%; transform:translateY(-50%);
+    width:44px; height:44px;
+    font-size:18px;
+  }
+  .lb-prev{ left:24px; }
+  .lb-next{ right:24px; }
+  .lb-close:hover, .lb-nav:hover{
+    border-color:var(--safelight);
+    color:var(--safelight);
+  }
+
+  footer{
+    padding:26px 6vw 50px;
+    color:#6f6c6a;
+    font-size:11px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    border-top:1px solid #333136;
+  }
+
+  .empty-state{
+    grid-column:1/-1;
+    padding:60px 20px;
+    text-align:center;
+    color:var(--paper-dim);
+    font-size:13px;
+    line-height:1.8;
+    background:var(--charcoal-2);
+  }
+  .empty-state code{
+    color:var(--safelight);
+    background:rgba(224,64,42,.1);
+    padding:2px 6px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="sprockets" id="sprockets-top"></div>
+
+  <header>
+    <div class="eyebrow">Roll 01 — Ghost of Tsushima, Director's Cut</div>
+    <h1>Iki Island,<br>one frame<br>at a time.</h1>
+    <p class="sub">169 captures from Tsushima and Iki, laid out the way a photographer used to lay a roll across the light table — one frame at a time, numbered, and never quite finished.</p>
+    <div class="roll-meta">
+      <div><b id="meta-count">0</b> frames</div>
+      <div>Format <b>PC screenshot</b></div>
+      <div>Status <b>Live</b></div>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid" id="grid"></div>
+  </main>
+
+  <footer>Click any frame to open it full size · Use ← → to move between frames · Esc to close</footer>
+
+  <div class="sprockets" id="sprockets-bottom"></div>
+
+  <div class="lightbox" id="lightbox">
+    <button class="lb-close" id="lb-close">✕</button>
+    <button class="lb-nav lb-prev" id="lb-prev">‹</button>
+    <button class="lb-nav lb-next" id="lb-next">›</button>
+    <img id="lb-img" src="" alt="">
+    <div class="lb-cap">
+      <div>
+        <div class="t" id="lb-title"></div>
+        <div class="d" id="lb-desc"></div>
+      </div>
+      <div class="lb-idx" id="lb-idx"></div>
+    </div>
+  </div>
+
+<script>
+/* ==================================================================
+   YOUR IMAGES GO HERE.
+   Put your image files inside an "images" folder next to this
+   index.html file in your GitHub repo, then list them below.
+
+   file  -> path to the image (relative to this page)
+   title -> short title shown on hover / in the viewer
+   desc  -> a line or two of caption text (optional, can be "")
+   ================================================================== */
+
+const IMAGES = [
+  { file: "images/ghost-001.png", title: "Ghost of Tsushima 1", desc: "2025-07-07 at 13:50:55" },
+  { file: "images/ghost-002.png", title: "Ghost of Tsushima 2", desc: "2025-07-07 at 13:51:58" },
+  { file: "images/ghost-003.png", title: "Ghost of Tsushima 3", desc: "2025-07-07 at 13:54:09" },
+  { file: "images/ghost-004.png", title: "Ghost of Tsushima 4", desc: "2025-07-07 at 13:54:27" },
+  { file: "images/ghost-005.png", title: "Ghost of Tsushima 5", desc: "2025-07-07 at 13:54:30" },
+  { file: "images/ghost-006.png", title: "Ghost of Tsushima 6", desc: "2025-07-07 at 13:54:33" },
+  { file: "images/ghost-007.png", title: "Ghost of Tsushima 7", desc: "2025-07-07 at 13:55:50" },
+  { file: "images/ghost-008.png", title: "Ghost of Tsushima 8", desc: "2025-07-07 at 13:56:10" },
+  { file: "images/ghost-009.png", title: "Ghost of Tsushima 9", desc: "2025-07-07 at 13:57:36" },
+  { file: "images/ghost-010.png", title: "Ghost of Tsushima 10", desc: "2025-07-07 at 13:57:40" },
+  { file: "images/ghost-011.png", title: "Ghost of Tsushima 11", desc: "2025-07-07 at 13:57:43" },
+  { file: "images/ghost-012.png", title: "Ghost of Tsushima 12", desc: "2025-07-07 at 14:26:17" },
+  { file: "images/ghost-013.png", title: "Ghost of Tsushima 13", desc: "2025-07-07 at 14:26:35" },
+  { file: "images/ghost-014.png", title: "Ghost of Tsushima 14", desc: "2025-07-07 at 14:32:50" },
+  { file: "images/ghost-015.png", title: "Ghost of Tsushima 15", desc: "2025-07-07 at 14:37:59" },
+  { file: "images/ghost-016.png", title: "Ghost of Tsushima 16", desc: "2025-07-07 at 14:40:18" },
+  { file: "images/ghost-017.png", title: "Ghost of Tsushima 17", desc: "2025-07-07 at 14:40:22" },
+  { file: "images/ghost-018.png", title: "Ghost of Tsushima 18", desc: "2025-07-09 at 12:09:52" },
+  { file: "images/ghost-019.png", title: "Ghost of Tsushima 19", desc: "2025-07-09 at 12:10:35" },
+  { file: "images/ghost-020.png", title: "Ghost of Tsushima 20", desc: "2025-07-09 at 12:13:44" },
+  { file: "images/ghost-021.png", title: "Ghost of Tsushima 21", desc: "2025-07-09 at 12:14:01" },
+  { file: "images/ghost-022.png", title: "Ghost of Tsushima 22", desc: "2025-07-09 at 12:14:09" },
+  { file: "images/ghost-023.png", title: "Ghost of Tsushima 23", desc: "2025-07-09 at 12:25:55" },
+  { file: "images/ghost-024.png", title: "Ghost of Tsushima 24", desc: "2025-07-09 at 12:26:38" },
+  { file: "images/ghost-025.png", title: "Ghost of Tsushima 25", desc: "2025-07-09 at 12:33:58" },
+  { file: "images/ghost-026.png", title: "Ghost of Tsushima 26", desc: "2025-07-09 at 12:33:59" },
+  { file: "images/ghost-027.png", title: "Ghost of Tsushima 27", desc: "2025-07-09 at 12:34:30" },
+  { file: "images/ghost-028.png", title: "Ghost of Tsushima 28", desc: "2025-07-09 at 12:34:34" },
+  { file: "images/ghost-029.png", title: "Ghost of Tsushima 29", desc: "2025-07-09 at 12:34:36" },
+  { file: "images/ghost-030.png", title: "Ghost of Tsushima 30", desc: "2025-07-09 at 12:34:39" },
+  { file: "images/ghost-031.png", title: "Ghost of Tsushima 31", desc: "2025-07-09 at 12:45:02" },
+  { file: "images/ghost-032.png", title: "Ghost of Tsushima 32", desc: "2025-07-09 at 12:45:07" },
+  { file: "images/ghost-033.png", title: "Ghost of Tsushima 33", desc: "2025-07-09 at 12:46:26" },
+  { file: "images/ghost-034.png", title: "Ghost of Tsushima 34", desc: "2025-07-09 at 12:47:50" },
+  { file: "images/ghost-035.png", title: "Ghost of Tsushima 35", desc: "2025-07-10 at 22:30:21" },
+  { file: "images/ghost-036.png", title: "Ghost of Tsushima 36", desc: "2025-07-10 at 23:06:48" },
+  { file: "images/ghost-037.png", title: "Ghost of Tsushima 37", desc: "2025-07-10 at 23:08:47" },
+  { file: "images/ghost-038.png", title: "Ghost of Tsushima 38", desc: "2025-07-12 at 13:39:56" },
+  { file: "images/ghost-039.png", title: "Ghost of Tsushima 39", desc: "2025-07-12 at 13:39:58" },
+  { file: "images/ghost-040.png", title: "Ghost of Tsushima 40", desc: "2025-07-12 at 13:40:46" },
+  { file: "images/ghost-041.png", title: "Ghost of Tsushima 41", desc: "2025-07-12 at 13:40:48" },
+  { file: "images/ghost-042.png", title: "Ghost of Tsushima 42", desc: "2025-07-12 at 13:40:50" },
+  { file: "images/ghost-043.png", title: "Ghost of Tsushima 43", desc: "2025-07-12 at 13:40:58" },
+  { file: "images/ghost-044.png", title: "Ghost of Tsushima 44", desc: "2025-07-12 at 13:43:04" },
+  { file: "images/ghost-045.png", title: "Ghost of Tsushima 45", desc: "2025-07-12 at 13:43:06" },
+  { file: "images/ghost-046.png", title: "Ghost of Tsushima 46", desc: "2025-07-12 at 13:43:08" },
+  { file: "images/ghost-047.png", title: "Ghost of Tsushima 47", desc: "2025-07-12 at 13:43:09" },
+  { file: "images/ghost-048.png", title: "Ghost of Tsushima 48", desc: "2025-07-12 at 13:43:14" },
+  { file: "images/ghost-049.png", title: "Ghost of Tsushima 49", desc: "2025-07-12 at 13:59:14" },
+  { file: "images/ghost-050.png", title: "Ghost of Tsushima 50", desc: "2025-07-12 at 14:00:09" },
+  { file: "images/ghost-051.png", title: "Ghost of Tsushima 51", desc: "2025-07-12 at 14:00:16" },
+  { file: "images/ghost-052.png", title: "Ghost of Tsushima 52", desc: "2025-07-12 at 14:01:07" },
+  { file: "images/ghost-053.png", title: "Ghost of Tsushima 53", desc: "2025-07-12 at 14:01:14" },
+  { file: "images/ghost-054.png", title: "Ghost of Tsushima 54", desc: "2025-07-12 at 14:01:17" },
+  { file: "images/ghost-055.png", title: "Ghost of Tsushima 55", desc: "2025-07-12 at 14:01:38" },
+  { file: "images/ghost-056.png", title: "Ghost of Tsushima 56", desc: "2025-07-12 at 14:02:16" },
+  { file: "images/ghost-057.png", title: "Ghost of Tsushima 57", desc: "2025-07-12 at 14:04:26" },
+  { file: "images/ghost-058.png", title: "Ghost of Tsushima 58", desc: "2025-07-12 at 14:04:28" },
+  { file: "images/ghost-059.png", title: "Ghost of Tsushima 59", desc: "2025-07-12 at 14:04:43" },
+  { file: "images/ghost-060.png", title: "Ghost of Tsushima 60", desc: "2025-07-12 at 14:04:59" },
+  { file: "images/ghost-061.png", title: "Ghost of Tsushima 61", desc: "2025-07-12 at 14:11:03" },
+  { file: "images/ghost-062.png", title: "Ghost of Tsushima 62", desc: "2025-07-12 at 14:11:14" },
+  { file: "images/ghost-063.png", title: "Ghost of Tsushima 63", desc: "2025-07-12 at 14:12:05" },
+  { file: "images/ghost-064.png", title: "Ghost of Tsushima 64", desc: "2025-07-12 at 14:12:06" },
+  { file: "images/ghost-065.png", title: "Ghost of Tsushima 65", desc: "2025-07-12 at 14:12:11" },
+  { file: "images/ghost-066.png", title: "Ghost of Tsushima 66", desc: "2025-07-12 at 14:21:23" },
+  { file: "images/ghost-067.png", title: "Ghost of Tsushima 67", desc: "2025-07-13 at 14:30:18" },
+  { file: "images/ghost-068.png", title: "Ghost of Tsushima 68", desc: "2025-07-13 at 14:30:21" },
+  { file: "images/ghost-069.png", title: "Ghost of Tsushima 69", desc: "2025-07-13 at 14:30:24" },
+  { file: "images/ghost-070.png", title: "Ghost of Tsushima 70", desc: "2025-07-13 at 14:31:24" },
+  { file: "images/ghost-071.png", title: "Ghost of Tsushima 71", desc: "2025-07-13 at 14:31:30" },
+  { file: "images/ghost-072.png", title: "Ghost of Tsushima 72", desc: "2025-07-13 at 14:31:39" },
+  { file: "images/ghost-073.png", title: "Ghost of Tsushima 73", desc: "2025-07-13 at 14:31:56" },
+  { file: "images/ghost-074.png", title: "Ghost of Tsushima 74", desc: "2025-07-13 at 14:31:58" },
+  { file: "images/ghost-075.png", title: "Ghost of Tsushima 75", desc: "2025-07-13 at 14:32:47" },
+  { file: "images/ghost-076.png", title: "Ghost of Tsushima 76", desc: "2025-07-13 at 14:32:52" },
+  { file: "images/ghost-077.png", title: "Ghost of Tsushima 77", desc: "2025-07-13 at 14:32:54" },
+  { file: "images/ghost-078.png", title: "Ghost of Tsushima 78", desc: "2025-07-13 at 14:32:59" },
+  { file: "images/ghost-079.png", title: "Ghost of Tsushima 79", desc: "2025-07-13 at 14:33:37" },
+  { file: "images/ghost-080.png", title: "Ghost of Tsushima 80", desc: "2025-07-13 at 14:35:21" },
+  { file: "images/ghost-081.png", title: "Ghost of Tsushima 81", desc: "2025-07-13 at 15:07:52" },
+  { file: "images/ghost-082.png", title: "Ghost of Tsushima 82", desc: "2025-07-13 at 15:14:13" },
+  { file: "images/ghost-083.png", title: "Ghost of Tsushima 83", desc: "2025-07-13 at 18:16:17" },
+  { file: "images/ghost-084.png", title: "Ghost of Tsushima 84", desc: "2025-07-13 at 18:17:16" },
+  { file: "images/ghost-085.png", title: "Ghost of Tsushima 85", desc: "2025-07-13 at 18:17:44" },
+  { file: "images/ghost-086.png", title: "Ghost of Tsushima 86", desc: "2025-07-13 at 18:17:46" },
+  { file: "images/ghost-087.png", title: "Ghost of Tsushima 87", desc: "2025-07-13 at 18:17:48" },
+  { file: "images/ghost-088.png", title: "Ghost of Tsushima 88", desc: "2025-07-13 at 18:17:50" },
+  { file: "images/ghost-089.png", title: "Ghost of Tsushima 89", desc: "2025-07-13 at 18:34:32" },
+  { file: "images/ghost-090.png", title: "Ghost of Tsushima 90", desc: "2025-07-13 at 18:56:11" },
+  { file: "images/ghost-091.png", title: "Ghost of Tsushima 91", desc: "2025-07-13 at 18:57:47" },
+  { file: "images/ghost-092.png", title: "Ghost of Tsushima 92", desc: "2025-07-13 at 19:30:49" },
+  { file: "images/ghost-093.png", title: "Ghost of Tsushima 93", desc: "2025-07-13 at 19:57:11" },
+  { file: "images/ghost-094.png", title: "Ghost of Tsushima 94", desc: "2025-07-13 at 19:58:05" },
+  { file: "images/ghost-095.png", title: "Ghost of Tsushima 95", desc: "2025-07-13 at 19:58:12" },
+  { file: "images/ghost-096.png", title: "Ghost of Tsushima 96", desc: "2025-07-13 at 20:01:44" },
+  { file: "images/ghost-097.png", title: "Ghost of Tsushima 97", desc: "2025-07-13 at 20:02:08" },
+  { file: "images/ghost-098.png", title: "Ghost of Tsushima 98", desc: "2025-07-15 at 17:15:10" },
+  { file: "images/ghost-099.png", title: "Ghost of Tsushima 99", desc: "2025-07-15 at 17:15:12" },
+  { file: "images/ghost-100.png", title: "Ghost of Tsushima 100", desc: "2025-07-15 at 17:46:10" },
+  { file: "images/ghost-101.png", title: "Ghost of Tsushima 101", desc: "2025-07-15 at 17:48:33" },
+  { file: "images/ghost-102.png", title: "Ghost of Tsushima 102", desc: "2025-07-15 at 17:48:36" },
+  { file: "images/ghost-103.png", title: "Ghost of Tsushima 103", desc: "2025-07-15 at 17:48:43" },
+  { file: "images/ghost-104.png", title: "Ghost of Tsushima 104", desc: "2025-07-15 at 22:37:41" },
+  { file: "images/ghost-105.png", title: "Ghost of Tsushima 105", desc: "2025-07-17 at 11:36:20" },
+  { file: "images/ghost-106.png", title: "Ghost of Tsushima 106", desc: "2025-07-17 at 11:48:14" },
+  { file: "images/ghost-107.png", title: "Ghost of Tsushima 107", desc: "2025-07-17 at 11:48:16" },
+  { file: "images/ghost-108.png", title: "Ghost of Tsushima 108", desc: "2025-07-17 at 11:48:18" },
+  { file: "images/ghost-109.png", title: "Ghost of Tsushima 109", desc: "2025-07-17 at 16:22:24" },
+  { file: "images/ghost-110.png", title: "Ghost of Tsushima 110", desc: "2025-07-17 at 17:08:14" },
+  { file: "images/ghost-111.png", title: "Ghost of Tsushima 111", desc: "2025-07-17 at 17:08:21" },
+  { file: "images/ghost-112.png", title: "Ghost of Tsushima 112", desc: "2025-07-17 at 17:08:25" },
+  { file: "images/ghost-113.png", title: "Ghost of Tsushima 113", desc: "2025-07-17 at 17:08:33" },
+  { file: "images/ghost-114.png", title: "Ghost of Tsushima 114", desc: "2025-07-17 at 17:24:52" },
+  { file: "images/ghost-115.png", title: "Ghost of Tsushima 115", desc: "2025-07-17 at 17:49:06" },
+  { file: "images/ghost-116.png", title: "Ghost of Tsushima 116", desc: "2025-07-17 at 17:50:28" },
+  { file: "images/ghost-117.png", title: "Ghost of Tsushima 117", desc: "2025-07-23 at 20:49:37" },
+  { file: "images/ghost-118.png", title: "Ghost of Tsushima 118", desc: "2025-07-23 at 20:49:43" },
+  { file: "images/ghost-119.png", title: "Ghost of Tsushima 119", desc: "2025-07-23 at 20:49:48" },
+  { file: "images/ghost-120.png", title: "Ghost of Tsushima 120", desc: "2025-07-23 at 21:09:49" },
+  { file: "images/ghost-121.png", title: "Ghost of Tsushima 121", desc: "2025-07-24 at 19:07:35" },
+  { file: "images/ghost-122.png", title: "Ghost of Tsushima 122", desc: "2025-07-24 at 19:10:25" },
+  { file: "images/ghost-123.png", title: "Ghost of Tsushima 123", desc: "2025-07-24 at 19:48:37" },
+  { file: "images/ghost-124.png", title: "Ghost of Tsushima 124", desc: "2025-07-24 at 19:51:09" },
+  { file: "images/ghost-125.png", title: "Ghost of Tsushima 125", desc: "2025-07-25 at 11:51:53" },
+  { file: "images/ghost-126.png", title: "Ghost of Tsushima 126", desc: "2025-07-25 at 11:52:48" },
+  { file: "images/ghost-127.png", title: "Ghost of Tsushima 127", desc: "2025-07-25 at 11:52:51" },
+  { file: "images/ghost-128.png", title: "Ghost of Tsushima 128", desc: "2025-07-25 at 11:56:21" },
+  { file: "images/ghost-129.png", title: "Ghost of Tsushima 129", desc: "2025-07-25 at 11:56:42" },
+  { file: "images/ghost-130.png", title: "Ghost of Tsushima 130", desc: "2025-07-25 at 12:05:36" },
+  { file: "images/ghost-131.png", title: "Ghost of Tsushima 131", desc: "2025-07-25 at 12:05:37" },
+  { file: "images/ghost-132.png", title: "Ghost of Tsushima 132", desc: "2025-07-25 at 12:05:42" },
+  { file: "images/ghost-133.png", title: "Ghost of Tsushima 133", desc: "2025-07-25 at 16:36:25" },
+  { file: "images/ghost-134.png", title: "Ghost of Tsushima 134", desc: "2025-07-25 at 16:36:34" },
+  { file: "images/ghost-135.png", title: "Ghost of Tsushima 135", desc: "2025-07-25 at 16:36:36" },
+  { file: "images/ghost-136.png", title: "Ghost of Tsushima 136", desc: "2025-07-25 at 17:05:17" },
+  { file: "images/ghost-137.png", title: "Ghost of Tsushima 137", desc: "2025-07-25 at 17:05:38" },
+  { file: "images/ghost-138.png", title: "Ghost of Tsushima 138", desc: "2025-07-26 at 22:03:16" },
+  { file: "images/ghost-139.png", title: "Ghost of Tsushima 139", desc: "2025-07-26 at 22:12:07" },
+  { file: "images/ghost-140.png", title: "Ghost of Tsushima 140", desc: "2025-07-26 at 22:41:43" },
+  { file: "images/ghost-141.png", title: "Ghost of Tsushima 141", desc: "2025-07-26 at 22:51:16" },
+  { file: "images/ghost-142.png", title: "Ghost of Tsushima 142", desc: "2025-07-26 at 22:51:36" },
+  { file: "images/ghost-143.png", title: "Ghost of Tsushima 143", desc: "2025-07-26 at 22:56:35" },
+  { file: "images/ghost-144.png", title: "Ghost of Tsushima 144", desc: "2025-07-26 at 22:56:38" },
+  { file: "images/ghost-145.png", title: "Ghost of Tsushima 145", desc: "2025-07-26 at 22:57:54" },
+  { file: "images/ghost-146.png", title: "Ghost of Tsushima 146", desc: "2025-07-27 at 12:38:59" },
+  { file: "images/ghost-147.png", title: "Ghost of Tsushima 147", desc: "2025-07-27 at 12:44:58" },
+  { file: "images/ghost-148.png", title: "Ghost of Tsushima 148", desc: "2025-07-27 at 13:06:18" },
+  { file: "images/ghost-149.png", title: "Ghost of Tsushima 149", desc: "2025-07-29 at 18:17:24" },
+  { file: "images/ghost-150.png", title: "Ghost of Tsushima 150", desc: "2025-08-02 at 18:20:09" },
+  { file: "images/ghost-151.png", title: "Ghost of Tsushima 151", desc: "2025-08-02 at 18:20:13" },
+  { file: "images/ghost-152.png", title: "Ghost of Tsushima 152", desc: "2025-08-02 at 18:25:31" },
+  { file: "images/ghost-153.png", title: "Ghost of Tsushima 153", desc: "2025-08-02 at 18:48:12" },
+  { file: "images/ghost-154.png", title: "Ghost of Tsushima 154", desc: "2025-08-02 at 18:48:16" },
+  { file: "images/ghost-155.png", title: "Ghost of Tsushima 155", desc: "2025-08-02 at 18:54:29" },
+  { file: "images/ghost-156.png", title: "Ghost of Tsushima 156", desc: "2025-08-06 at 21:08:27" },
+  { file: "images/ghost-157.png", title: "Ghost of Tsushima 157", desc: "2025-08-09 at 22:35:58" },
+  { file: "images/ghost-158.png", title: "Ghost of Tsushima 158", desc: "2025-08-09 at 22:36:02" },
+  { file: "images/ghost-159.png", title: "Ghost of Tsushima 159", desc: "2025-08-09 at 22:36:05" },
+  { file: "images/ghost-160.png", title: "Ghost of Tsushima 160", desc: "2025-08-09 at 22:38:14" },
+  { file: "images/ghost-161.png", title: "Ghost of Tsushima 161", desc: "2025-08-09 at 22:38:17" },
+  { file: "images/ghost-162.png", title: "Ghost of Tsushima 162", desc: "2025-08-09 at 22:38:18" },
+  { file: "images/ghost-163.png", title: "Ghost of Tsushima 163", desc: "2025-08-09 at 22:38:22" },
+  { file: "images/ghost-164.png", title: "Ghost of Tsushima 164", desc: "2025-08-09 at 22:41:26" },
+  { file: "images/ghost-165.png", title: "Ghost of Tsushima 165", desc: "2025-08-09 at 22:41:28" },
+  { file: "images/ghost-166.png", title: "Ghost of Tsushima 166", desc: "2025-08-09 at 22:41:29" },
+  { file: "images/ghost-167.png", title: "Ghost of Tsushima 167", desc: "2025-08-09 at 22:41:31" },
+  { file: "images/ghost-168.png", title: "Ghost of Tsushima 168", desc: "2025-08-09 at 22:41:38" },
+  { file: "images/ghost-169.png", title: "Ghost of Tsushima 169", desc: "" },
+];
+
+/* ================================================================== */
+
+const grid = document.getElementById('grid');
+const metaCount = document.getElementById('meta-count');
+
+function pad(n){ return String(n).padStart(4,'0'); }
+
+function render(){
+  metaCount.textContent = IMAGES.length;
+
+  if(IMAGES.length === 0){
+    grid.innerHTML = `<div class="empty-state">
+      No frames loaded yet.<br><br>
+      Add images to an <code>/images</code> folder in your repo, then list them
+      in the <code>IMAGES</code> array near the bottom of <code>index.html</code>.
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = IMAGES.map((img, i) => `
+    <div class="frame" data-index="${i}">
+      <span class="frame-id">${pad(i+1)}</span>
+      <img src="${img.file}" alt="${img.title || ''}" loading="lazy">
+      <div class="frame-cap">
+        <div class="t">${img.title || ''}</div>
+        <div class="d">${img.desc || ''}</div>
+      </div>
+    </div>
+  `).join('');
+
+  document.querySelectorAll('.frame').forEach(f => {
+    f.addEventListener('click', () => openLightbox(parseInt(f.dataset.index)));
+  });
+}
+
+/* sprockets */
+function buildSprockets(){
+  const count = Math.ceil(window.innerWidth / 24);
+  const holes = '<span></span>'.repeat(count);
+  document.getElementById('sprockets-top').innerHTML = holes;
+  document.getElementById('sprockets-bottom').innerHTML = holes;
+}
+buildSprockets();
+window.addEventListener('resize', buildSprockets);
+
+/* lightbox */
+const lightbox = document.getElementById('lightbox');
+const lbImg = document.getElementById('lb-img');
+const lbTitle = document.getElementById('lb-title');
+const lbDesc = document.getElementById('lb-desc');
+const lbIdx = document.getElementById('lb-idx');
+let current = 0;
+
+function openLightbox(i){
+  current = i;
+  updateLightbox();
+  lightbox.classList.add('open');
+}
+function updateLightbox(){
+  const img = IMAGES[current];
+  lbImg.src = img.file;
+  lbImg.alt = img.title || '';
+  lbTitle.textContent = img.title || '';
+  lbDesc.textContent = img.desc || '';
+  lbIdx.textContent = `FRAME ${pad(current+1)} / ${pad(IMAGES.length)}`;
+}
+function closeLightbox(){ lightbox.classList.remove('open'); }
+function nextImg(){ current = (current+1) % IMAGES.length; updateLightbox(); }
+function prevImg(){ current = (current-1+IMAGES.length) % IMAGES.length; updateLightbox(); }
+
+document.getElementById('lb-close').addEventListener('click', closeLightbox);
+document.getElementById('lb-next').addEventListener('click', nextImg);
+document.getElementById('lb-prev').addEventListener('click', prevImg);
+lightbox.addEventListener('click', e => { if(e.target === lightbox) closeLightbox(); });
+
+document.addEventListener('keydown', e => {
+  if(!lightbox.classList.contains('open')) return;
+  if(e.key === 'Escape') closeLightbox();
+  if(e.key === 'ArrowRight') nextImg();
+  if(e.key === 'ArrowLeft') prevImg();
+});
+
+render();
+</script>
+</body>
+</html>
