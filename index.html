@@ -90,6 +90,21 @@
     line-height:1.02;
     letter-spacing:-.01em;
     max-width:14ch;
+    position:relative;
+  }
+  .lit-credit{
+    display:block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--paper-dim);
+    text-decoration:none;
+    margin-top:14px;
+    transition:color .2s ease;
+  }
+  .lit-credit:hover{
+    color:var(--paper);
   }
   .sub{
     margin-top:22px;
@@ -109,6 +124,60 @@
     color:#6f6c6a;
   }
   .roll-meta b{ color:var(--paper-dim); font-weight:500; }
+
+  .game-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    margin-top:16px;
+    padding:6px 14px 6px 10px;
+    border:1px solid rgba(224,64,42,.35);
+    background:rgba(224,64,42,.06);
+    border-radius:999px;
+    color:var(--paper);
+    text-decoration:none;
+    letter-spacing:.06em;
+    transition:border-color .25s ease, background .25s ease, transform .25s ease, box-shadow .25s ease;
+  }
+  .game-badge:hover{
+    border-color:var(--safelight);
+    background:rgba(224,64,42,.14);
+    transform:translateY(-1px);
+    box-shadow:0 6px 18px rgba(224,64,42,.18);
+  }
+  .game-badge .mark{
+    width:14px; height:14px;
+    flex:0 0 auto;
+    position:relative;
+  }
+  .game-badge .mark::before,
+  .game-badge .mark::after{
+    content:"";
+    position:absolute;
+    background:var(--safelight);
+  }
+  .game-badge .mark::before{
+    left:50%; top:0;
+    width:1.5px; height:100%;
+    transform:translateX(-50%);
+  }
+  .game-badge .mark::after{
+    top:50%; left:0;
+    height:1.5px; width:100%;
+    transform:translateY(-50%);
+  }
+  .game-badge .mark{
+    border:1.5px solid var(--safelight);
+    border-radius:50%;
+  }
+  .game-badge .title{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:600;
+    font-size:13px;
+    text-transform:none;
+    letter-spacing:0;
+  }
 
   /* ---------- contact sheet grid ---------- */
   main{
@@ -281,20 +350,119 @@
   @media (prefers-reduced-motion: reduce){
     *{ animation:none !important; transition:none !important; }
   }
+
+  /* ---------- intro splash ---------- */
+  html, body.intro-lock{ overflow:hidden; height:100%; }
+  .intro-splash{
+    position:fixed;
+    inset:0;
+    z-index:500;
+    background:#000;
+    display:flex;
+    align-items:flex-end;
+    justify-content:flex-start;
+    overflow:hidden;
+    animation:intro-hide 0s linear 5.4s forwards;
+  }
+  .intro-splash img{
+    position:absolute;
+    inset:0;
+    width:100%; height:100%;
+    object-fit:cover;
+    opacity:0;
+    transform:scale(1.06);
+    animation:intro-img-in 5.4s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+  .intro-splash::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(to top, rgba(0,0,0,.85), rgba(0,0,0,.15) 45%, rgba(0,0,0,.55));
+    opacity:0;
+    animation:intro-scrim-in 5.4s ease forwards;
+  }
+  .intro-text{
+    position:relative;
+    z-index:2;
+    padding:6vw;
+    opacity:0;
+    animation:intro-text-in 5.4s ease forwards;
+  }
+  .intro-text .line{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:500;
+    font-size:clamp(2.2rem, 6vw, 4.2rem);
+    color:var(--paper);
+    letter-spacing:-.01em;
+  }
+  .intro-text .tag{
+    margin-top:14px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--paper-dim);
+  }
+  @keyframes intro-img-in{
+    0%{ opacity:0; transform:scale(1.06); }
+    18%{ opacity:1; transform:scale(1.02); }
+    78%{ opacity:1; transform:scale(1); }
+    100%{ opacity:0; transform:scale(.99); }
+  }
+  @keyframes intro-scrim-in{
+    0%{ opacity:0; }
+    18%{ opacity:1; }
+    78%{ opacity:1; }
+    100%{ opacity:0; }
+  }
+  @keyframes intro-text-in{
+    0%{ opacity:0; transform:translateY(14px); }
+    30%{ opacity:1; transform:translateY(0); }
+    78%{ opacity:1; transform:translateY(0); }
+    100%{ opacity:0; transform:translateY(-10px); }
+  }
+  @keyframes intro-hide{
+    to{ opacity:0; visibility:hidden; pointer-events:none; }
+  }
+  .intro-splash.skip{
+    animation:intro-hide 0s linear 0s forwards;
+  }
+  .intro-splash.skip img,
+  .intro-splash.skip::after,
+  .intro-splash.skip .intro-text{
+    animation:none;
+    transition:opacity .6s ease;
+    opacity:0;
+  }
 </style>
 </head>
 <body>
+
+  <div class="intro-splash" id="intro-splash">
+    <img src="images-intro/intro-splash.png" alt="A rider pauses at the edge of a red spider lily field on Iki Island">
+    <div class="intro-text">
+      <div class="line">It was a cinema.</div>
+      <div class="tag">Ghost of Tsushima, Director's Cut — click to skip</div>
+    </div>
+  </div>
 
   <div class="sprockets" id="sprockets-top"></div>
 
   <header>
     <div class="eyebrow">Roll 01 — Ghost of Tsushima, Director's Cut</div>
     <h1>Iki Island,<br>one frame<br>at a time.</h1>
+    <a class="game-badge" href="https://www.playstation.com/en-in/games/ghost-of-tsushima/" target="_blank" rel="noopener" title="Screenshots from Ghost of Tsushima, Director's Cut (Sucker Punch Productions)">
+      <span class="mark"></span>
+      <span class="title">SLV's Gameplay</span>
+    </a>
     <p class="sub">169 captures from Tsushima and Iki, laid out the way a photographer used to lay a roll across the light table — one frame at a time, numbered, and never quite finished.</p>
     <div class="roll-meta">
       <div><b id="meta-count">0</b> frames</div>
       <div>Format <b>PC screenshot</b></div>
       <div>Status <b>Live</b></div>
+      <div>Taken from <b>SLV's Gameplay</b></div>
+      <div>Game <b><a href="https://www.playstation.com/en-in/games/ghost-of-tsushima/" target="_blank" rel="noopener" style="color:inherit; text-decoration:underline; text-underline-offset:3px; font-size:13px;">Ghost of Tsushima</a></b></div>
     </div>
   </header>
 
@@ -302,7 +470,7 @@
     <div class="grid" id="grid"></div>
   </main>
 
-  <footer>Click any frame to open it full size · Use ← → to move between frames · Esc to close</footer>
+  <footer>Click any frame to open it full size · Use ← → to move between frames · Esc to close · Taken from SLV's Gameplay · Screenshots from <a href="https://www.playstation.com/en-in/games/ghost-of-tsushima/" target="_blank" rel="noopener" style="color:inherit; text-decoration:underline; text-underline-offset:2px;">Ghost of Tsushima, Director's Cut</a> (Sucker Punch Productions)</footer>
 
   <div class="sprockets" id="sprockets-bottom"></div>
 
@@ -586,6 +754,12 @@ document.addEventListener('keydown', e => {
 });
 
 render();
+
+/* intro splash: click anywhere to skip */
+const introSplash = document.getElementById('intro-splash');
+if(introSplash){
+  introSplash.addEventListener('click', () => introSplash.classList.add('skip'));
+}
 </script>
 </body>
 </html>
